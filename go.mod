@@ -4,5 +4,5 @@ go 1.13
 
 require (
 	github.com/gin-gonic/gin v1.6.3
-	github.com/openfaas-incubator/go-function-sdk v0.0.0-20200405082418-b31e65bf8a33
+	github.com/snapcoreinc/dih-golang-sdk v0.0.0-20200727131200-144c3cefbb45
 )
