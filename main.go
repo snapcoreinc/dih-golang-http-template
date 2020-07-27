@@ -17,7 +17,7 @@ import (
 
 	function "handler/module"
 
-	handler "github.com/openfaas-incubator/go-function-sdk"
+	"github.com/snapcoreinc/dih-golang-sdk/handler"
 )
 
 var (
