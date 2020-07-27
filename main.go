@@ -114,7 +114,7 @@ func makeRequestHandler() func(ctx *gin.Context) {
 
 		context := &handler.Context{}
 
-		result, resultErr := function.HandleHandleRequestRequest(&context, &req)
+		result, resultErr := function.HandleRequestRequest(&context, &req)
 
 		if result.Header != nil {
 			for k, v := range result.Header {
