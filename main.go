@@ -13,8 +13,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
-
 	function "handler/module"
 
 	"github.com/snapcoreinc/dih-golang-sdk/handler"
@@ -30,18 +28,15 @@ func main() {
 	readTimeout := parseIntOrDurationValue(os.Getenv("read_timeout"), defaultTimeout)
 	writeTimeout := parseIntOrDurationValue(os.Getenv("write_timeout"), defaultTimeout)
 
-	router := gin.Default()
-
 	s := &http.Server{
 		// for security reasons - all traffic is routed via the snapcore-monitor which enforces oauth2
 		Addr:           fmt.Sprintf("127.0.0.1:%d", 8082),
 		ReadTimeout:    readTimeout,
 		WriteTimeout:   writeTimeout,
-		Handler:        router,
 		MaxHeaderBytes: 1 << 20, // Max header of 1MB
 	}
 
-	router.Any("/", makeRequestHandler())
+	http.HandleFunc("/", makeRequestHandler())
 
 	listenUntilShutdown(s, writeTimeout)
 }
@@ -82,13 +77,8 @@ func listenUntilShutdown(s *http.Server, shutdownTimeout time.Duration) {
 	<-idleConnsClosed
 }
 
-func makeRequestHandler() func(ctx *gin.Context) {
-	return func(ctx *gin.Context) {
-
-		//	w:=ctx.Request.GetBody
-
-		w := ctx.Writer
-		r := ctx.Request
+func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 
 		var input []byte
 
@@ -110,11 +100,11 @@ func makeRequestHandler() func(ctx *gin.Context) {
 			Method:      r.Method,
 			QueryString: r.URL.RawQuery,
 		}
-		req.WithContext(r.Context())
 
-		context := &handler.Context{}
+		thecontext := &handler.Context{}
+		thecontext.WithContext(r.Context())
 
-		result, resultErr := function.HandleRequest(context, req)
+		result, resultErr := function.HandleRequest(thecontext, req)
 
 		if result.Header != nil {
 			for k, v := range result.Header {
