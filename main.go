@@ -13,6 +13,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	function "handler/module"
 
 	handler "github.com/openfaas-incubator/go-function-sdk"
@@ -28,14 +30,19 @@ func main() {
 	readTimeout := parseIntOrDurationValue(os.Getenv("read_timeout"), defaultTimeout)
 	writeTimeout := parseIntOrDurationValue(os.Getenv("write_timeout"), defaultTimeout)
 
+	router := gin.Default()
+
 	s := &http.Server{
-		Addr:           fmt.Sprintf(":%d", 8082),
+		// for security reasons - all traffic is routed via the snapcore-monitor which enforces oauth2
+		Addr:           fmt.Sprintf("127.0.0.1:%d", 8082),
 		ReadTimeout:    readTimeout,
 		WriteTimeout:   writeTimeout,
+		Handler:        router,
 		MaxHeaderBytes: 1 << 20, // Max header of 1MB
 	}
 
-	http.HandleFunc("/", makeRequestHandler())
+	router.Any("/", makeRequestHandler())
+
 	listenUntilShutdown(s, writeTimeout)
 }
 
@@ -75,8 +82,14 @@ func listenUntilShutdown(s *http.Server, shutdownTimeout time.Duration) {
 	<-idleConnsClosed
 }
 
-func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func makeRequestHandler() func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+
+		//	w:=ctx.Request.GetBody
+
+		w := ctx.Writer
+		r := ctx.Request
+
 		var input []byte
 
 		if r.Body != nil {
@@ -100,6 +113,7 @@ func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
 		req.WithContext(r.Context())
 
 		result, resultErr := function.Handle(req)
+		//result, resultErr := module.Handle(req)
 
 		if result.Header != nil {
 			for k, v := range result.Header {

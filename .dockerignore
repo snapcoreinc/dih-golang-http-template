@@ -1,1 +1,4 @@
 module/vendor/github.com/openfaas-incubator/go-function-sdk
+.git
+.vscode
+.idea
