@@ -8,7 +8,7 @@ import (
 )
 
 // Handle a module invocation
-func Handle(ctx handler.Context, req handler.Request) (handler.Response, error) {
+func HandleRequest(ctx handler.Context, req handler.Request) (handler.Response, error) {
 	var err error
 
 	message := fmt.Sprintf("Hello world, input was: %s", string(req.Body))
