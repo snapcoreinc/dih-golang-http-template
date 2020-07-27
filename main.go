@@ -104,7 +104,7 @@ func makeRequestHandler() func(ctx *gin.Context) {
 			input = bodyBytes
 		}
 
-		req := handler.Request{
+		req := &handler.Request{
 			Body:        input,
 			Header:      r.Header,
 			Method:      r.Method,
@@ -114,7 +114,7 @@ func makeRequestHandler() func(ctx *gin.Context) {
 
 		context := &handler.Context{}
 
-		result, resultErr := function.HandleRequestRequest(&context, &req)
+		result, resultErr := function.HandleRequest(context, req)
 
 		if result.Header != nil {
 			for k, v := range result.Header {
